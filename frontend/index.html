@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SchedulePro - Time Slot Booking</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <style>
+    :root {
+      --primary: #5b21b6;
+      --primary-light: #7c3aed;
+      --primary-dark: #4c1d95;
+      --accent: #14b8a6;
+      --accent-light: #2dd4bf;
+      --background: #f5f7ff;
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --glass-bg: rgba(255, 255, 255, 0.1);
+      --text-dark: #1e293b;
+      --text-gray: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s ease;
+      --transition-fast: all 0.2s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, var(--background), #e2e8f0);
+      color: var(--text-dark);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    .auth-container {
+      display: flex;
+      min-height: 100vh;
+      position: relative;
+      background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"%3E%3Cpath fill="%235b21b6" fill-opacity="0.1" d="M0,160L80,186.7C160,213,320,267,480,266.7C640,267,800,213,960,186.7C1120,160,1280,160,1360,160L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"%3E%3C/path%3E%3C/svg%3E') no-repeat bottom;
+      background-size: cover;
+    }
+
+    .auth-illustration {
+      flex: 1;
+      background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-illustration::before {
+      content: '';
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+      animation: pulse 20s infinite ease-in-out;
+      top: -50%;
+      left: -50%;
+    }
+
+    .auth-content {
+      max-width: 480px;
+      padding: 4rem 2.5rem;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      margin: 2rem;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+
+    .auth-form {
+      width: 100%;
+    }
+
+    .auth-switch {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: var(--text-gray);
+      font-size: 0.9rem;
+    }
+
+    .auth-switch a {
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+      transition: var(--transition-fast);
+    }
+
+    .auth-switch a:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
+    }
+
+    .form-group {
+      margin-bottom: 1.75rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text-dark);
+      font-size: 0.9rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--text-dark);
+      font-size: 0.95rem;
+      transition: var(--transition-fast);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(91, 33, 182, 0.1);
+      background: white;
+    }
+
+    .form-input::placeholder {
+      color: var(--text-gray);
+      opacity: 0.7;
+    }
+
+    .btn {
+      padding: 1rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      border: none;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-light);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+      top: -50%;
+      left: -50%;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .btn-primary:hover::after {
+      opacity: 1;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+      display: none;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3.5rem;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .header h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 1rem;
+    }
+
+    .header p {
+      color: var(--text-gray);
+      font-size: 1.1rem;
+      max-width: 700px;
+      margin: 0 auto;
+      font-weight: 400;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    .slots-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+      animation: fadeInUp 1s ease-out;
+    }
+
+    .slot-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slot-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 24px rgba(31, 38, 135, 0.2);
+    }
+
+    .slot-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background: var(--border);
+      transition: var(--transition);
+    }
+
+    .slot-card.booked::before {
+      background: linear-gradient(90deg, #f43f5e, #fb7185);
+    }
+
+    .slot-card.available::before {
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+    }
+
+    .slot-time {
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: var(--text-dark);
+    }
+
+    .slot-status {
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+      color: var(--text-gray);
+      font-weight: 400;
+    }
+
+    .slot-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .btn-book {
+      background: var(--accent);
+      color: white;
+      padding: 0.9rem 1.5rem;
+      border-radius: 10px;
+      width: auto;
+    }
+
+    .btn-book:hover {
+      background: var(--accent-light);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .btn-cancel {
+      background: transparent;
+      color: #f43f5e;
+      border: 1px solid var(--border);
+      padding: 0.9rem 1.5rem;
+      border-radius: 10px;
+      width: auto;
+    }
+
+    .btn-cancel:hover {
+      background: rgba(244, 63, 94, 0.05);
+      border-color: #f43f5e;
+      transform: translateY(-2px);
+    }
+
+    .name-input {
+      width: 100%;
+      padding: 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--text-dark);
+      font-size: 0.95rem;
+      transition: var(--transition-fast);
+    }
+
+    .name-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
+    }
+
+    .name-input::placeholder {
+      color: var(--text-gray);
+      opacity: 0.7;
+    }
+
+    .select-input {
+      width: 100%;
+      padding: 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--text-dark);
+      font-size: 0.95rem;
+      transition: var(--transition-fast);
+    }
+
+    .select-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.2); }
+    }
+
+    @media (max-width: 1024px) {
+      .slots-container {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      }
+    }
+
+    @media (max-width: 768px) {
+      .auth-container {
+        flex-direction: column;
+      }
+
+      .auth-illustration {
+        min-height: 280px;
+        padding: 2rem;
+      }
+
+      .auth-content {
+        margin: 1rem;
+        padding: 2.5rem 1.5rem;
+        border-radius: 16px;
+      }
+
+      .header h1 {
+        font-size: 2.2rem;
+      }
+
+      .header p {
+        font-size: 1rem;
+      }
+
+      .slots-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+
+      .slot-card {
+        padding: 1.5rem;
+      }
+
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 200px;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 5px solid rgba(91, 33, 182, 0.2);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error-message {
+      background: rgba(244, 63, 94, 0.1);
+      color: #f43f5e;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .error-message::before {
+      content: '!';
+      width: 24px;
+      height: 24px;
+      background: #f43f5e;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .btn:focus, .form-input:focus, .name-input:focus, .select-input:focus {
+      outline: 3px solid var(--primary-light);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container" id="auth-container" role="main">
+    <div class="auth-illustration" aria-hidden="true">
+      <div style="max-width: 480px; text-align: center; z-index: 1;">
+        <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;">Welcome to SchedulePro</h2>
+        <p style="font-size: 1.1rem; opacity: 0.9; font-weight: 400;">Effortlessly book your appointments with our premium scheduling solution.</p>
+      </div>
+    </div>
+    <div class="auth-content">
+      <div id="login-form" role="form" aria-labelledby="login-heading">
+        <h2 id="login-heading" style="font-size: 2rem; font-weight: 700; margin-bottom: 2rem; color: var(--text-dark);">Sign In</h2>
+        <div class="auth-form">
+          <div class="form-group">
+            <label for="login-email" class="form-label">Email Address</label>
+            <input type="email" id="login-email" class="form-input" placeholder="Enter your email" required aria-required="true">
+          </div>
+          <div class="form-group">
+            <label for="login-password" class="form-label">Password</label>
+            <input type="password" id="login-password" class="form-input" placeholder="Enter your password" required aria-required="true">
+          </div>
+          <div id="login-error" class="error-message" style="display: none;" role="alert"></div>
+          <button class="btn btn-primary" onclick="handleLogin()" aria-label="Sign in to your account">Sign In</button>
+          <div class="auth-switch">
+            New to SchedulePro? <a href="#" onclick="showSignup()" aria-label="Switch to sign up form">Create an account</a>
+          </div>
+        </div>
+      </div>
+
+      <div id="signup-form" style="display: none;" role="form" aria-labelledby="signup-heading">
+        <h2 id="signup-heading" style="font-size: 2rem; font-weight: 700; margin-bottom: 2rem; color: var(--text-dark);">Sign Up</h2>
+        <div class="auth-form">
+          <div class="form-group">
+            <label for="signup-email" class="form-label">Email Address</label>
+            <input type="email" id="signup-email" class="form-input" placeholder="Enter your email" required aria-required="true">
+          </div>
+          <div class="form-group">
+            <label for="signup-password" class="form-label">Password</label>
+            <input type="password" id="signup-password" class="form-input" placeholder="Create a password" required aria-required="true">
+          </div>
+          <div class="form-group">
+            <label for="signup-confirm" class="form-label">Confirm Password</label>
+            <input type="password" id="signup-confirm" class="form-input" placeholder="Confirm your password" required aria-required="true">
+          </div>
+          <div id="signup-error" class="error-message" style="display: none;" role="alert"></div>
+          <button class="btn btn-primary" onclick="handleSignup()" aria-label="Create a new account">Create Account</button>
+          <div class="auth-switch">
+            Already have an account? <a href="#" onclick="showLogin()" aria-label="Switch to sign in form">Sign In</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" id="app-container" role="main">
+    <div class="header">
+      <h1>SchedulePro Booking</h1>
+      <p>Secure your ideal time slot with our intuitive booking platform</p>
+    </div>
+    <div class="controls">
+      <input type="text" id="date-picker" class="form-input" placeholder="Select Date" aria-label="Select booking date">
+    </div>
+    <div class="slots-container" id="slots-container" role="region" aria-live="polite"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script>
+    const API_URL = 'http://localhost:3004';
+    let currentUser = null;
+    let selectedDate = new Date().toISOString().split('T')[0];
+
+    function showLogin() {
+      document.getElementById('login-form').style.display = 'block';
+      document.getElementById('signup-form').style.display = 'none';
+      document.getElementById('login-error').style.display = 'none';
+      document.getElementById('signup-error').style.display = 'none';
+      document.getElementById('login-email').focus();
+    }
+
+    function showSignup() {
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('signup-form').style.display = 'block';
+      document.getElementById('login-error').style.display = 'none';
+      document.getElementById('signup-error').style.display = 'none';
+      document.getElementById('signup-email').focus();
+    }
+
+    function handleLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value.trim();
+      const errorElement = document.getElementById('login-error');
+
+      if (!email || !password) {
+        errorElement.textContent = 'Please fill in all fields';
+        errorElement.style.display = 'flex';
+        return;
+      }
+
+      if (email === 'user@example.com' && password === 'password123') {
+        currentUser = { name: 'Demo User', email };
+        showApp();
+      } else {
+        errorElement.textContent = 'Invalid email or password';
+        errorElement.style.display = 'flex';
+      }
+    }
+
+    function handleSignup() {
+  const email = document.getElementById('signup-email').value.trim();
+  const password = document.getElementById('signup-password').value.trim();
+  const confirm = document.getElementById('signup-confirm').value.trim();
+  const errorElement = document.getElementById('signup-error');
+
+  // Reset error display
+  errorElement.style.display = 'none';
+  
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    errorElement.textContent = 'Please enter a valid email address';
+    errorElement.style.display = 'flex';
+    document.getElementById('signup-email').focus();
+    return;
+  }
+
+  // Check if all fields are filled
+  if (!email || !password || !confirm) {
+    errorElement.textContent = 'Please fill in all fields';
+    errorElement.style.display = 'flex';
+    return;
+  }
+
+  // Check password match
+  if (password !== confirm) {
+    errorElement.textContent = 'Passwords do not match';
+    errorElement.style.display = 'flex';
+    document.getElementById('signup-confirm').focus();
+    return;
+  }
+
+  // Check password strength
+  if (password.length < 6) {
+    errorElement.textContent = 'Password must be at least 6 characters';
+    errorElement.style.display = 'flex';
+    document.getElementById('signup-password').focus();
+    return;
+  }
+
+  // If all validations pass, proceed with signup
+  currentUser = { 
+    name: email.split('@')[0], // Use the part before @ as name
+    email 
+  };
+  
+  // Show success message and redirect to app
+  errorElement.textContent = 'Account created successfully!';
+  errorElement.style.display = 'flex';
+  errorElement.style.backgroundColor = 'rgba(20, 184, 166, 0.1)';
+  errorElement.style.color = 'var(--accent)';
+  
+  setTimeout(() => {
+    showApp();
+  }, 1500);
+}
+
+    function showApp() {
+      document.getElementById('auth-container').style.display = 'none';
+      document.getElementById('app-container').style.display = 'block';
+      fetchSlots();
+    }
+
+    async function fetchSlots() {
+      const container = document.getElementById('slots-container');
+      container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+      try {
+        const res = await fetch(`${API_URL}/slots?date=${selectedDate}`);
+        if (!res.ok) throw new Error('Failed to fetch slots');
+        const slots = await res.json();
+        renderSlots(slots);
+      } catch (error) {
+        container.innerHTML = `
+          <div class="error-message" style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #f43f5e;">
+            Failed to load slots. Please <button onclick="fetchSlots()" style="background: none; border: none; color: var(--primary); text-decoration: underline; cursor: pointer;">refresh</button> the page.
+          </div>
+        `;
+      }
+    }
+
+    function renderSlots(slots) {
+      const container = document.getElementById('slots-container');
+      container.innerHTML = '';
+
+      slots.forEach((slot, index) => {
+        const card = document.createElement('div');
+        card.className = `slot-card ${slot.booked ? 'booked' : 'available'}`;
+        card.style.animationDelay = `${index * 0.05}s`;
+        card.innerHTML = `
+          <div class="slot-time">${slot.time}</div>
+          <div class="slot-status">${slot.booked ? `Booked by ${slot.name}` : 'Available for booking'}</div>
+          <div class="slot-actions">
+            ${slot.booked ? `
+              <button class="btn btn-cancel" onclick="cancelSlot('${slot.time}')" aria-label="Cancel booking for ${slot.time}">
+                Cancel
+              </button>
+            ` : `
+              <input type="text" class="name-input" placeholder="Your full name" id="name-${slot.time}" aria-label="Name for ${slot.time} booking">
+              <select class="select-input" id="recurrence-${slot.time}" aria-label="Recurrence for ${slot.time} booking">
+                <option value="one-time">One-Time</option>
+                <option value="weekly">Weekly</option>
+              </select>
+              <button class="btn btn-book" onclick="bookSlot('${slot.time}')" aria-label="Book slot for ${slot.time}">
+                Book Now
+              </button>
+            `}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    async function bookSlot(time) {
+      const nameInput = document.getElementById(`name-${time}`);
+      const name = nameInput.value.trim();
+      const recurrence = document.getElementById(`recurrence-${time}`).value;
+
+      if (!name) {
+        nameInput.focus();
+        nameInput.style.borderColor = '#f43f5e';
+        setTimeout(() => {
+          nameInput.style.borderColor = 'var(--border)';
+        }, 1000);
+        return;
+      }
+
+      try {
+        const btn = document.querySelector(`button[onclick="bookSlot('${time}')"]`);
+        btn.disabled = true;
+        btn.innerHTML = 'Booking...';
+
+        const res = await fetch(`${API_URL}/book`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ date: selectedDate, time, name, recurrence })
+        });
+
+        if (!res.ok) throw new Error('Failed to book slot');
+        const result = await res.json();
+
+        const card = btn.closest('.slot-card');
+        card.style.transform = 'scale(1.05)';
+        card.style.boxShadow = '0 16px 32px rgba(20, 184, 166, 0.3)';
+        setTimeout(() => {
+          card.style.transform = '';
+          card.style.boxShadow = '';
+          if (recurrence === 'weekly') {
+            bookRecurringSlots(time, name);
+          }
+          fetchSlots();
+        }, 500);
+      } catch (error) {
+        alert('Failed to book slot. Please try again.');
+        btn.disabled = false;
+        btn.innerHTML = 'Book Now';
+      }
+    }
+
+    async function bookRecurringSlots(time, name) {
+      const baseDate = new Date(selectedDate);
+      for (let i = 1; i <= 3; i++) {
+        const newDate = new Date(baseDate.getTime() + i * 7 * 24 * 60 * 60 * 1000);
+        const dateStr = newDate.toISOString().split('T')[0];
+        try {
+          const res = await fetch(`${API_URL}/book`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ date: dateStr, time, name, recurrence: 'weekly' })
+          });
+          if (!res.ok) console.warn(`Failed to book slot for ${dateStr} at ${time}`);
+        } catch (error) {
+          console.warn(`Error booking slot for ${dateStr} at ${time}:`, error);
+        }
+      }
+    }
+
+    async function cancelSlot(time) {
+      if (!confirm('Are you sure you want to cancel this booking?')) {
+        return false;
+      }
+
+      try {
+        const btn = document.querySelector(`button[onclick="cancelSlot('${time}')"]`);
+        btn.disabled = true;
+        btn.innerHTML = 'Cancelling...';
+
+        const res = await fetch(`${API_URL}/cancel`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ date: selectedDate, time })
+        });
+
+        if (!res.ok) throw new Error('Failed to cancel booking');
+        const result = await res.json();
+
+        const card = btn.closest('.slot-card');
+        card.style.transform = 'scale(0.95)';
+        card.style.opacity = '0.7';
+        setTimeout(() => {
+          card.style.transform = '';
+          card.style.opacity = '';
+          fetchSlots();
+        }, 300);
+      } catch (error) {
+        alert('Failed to cancel booking. Please try again.');
+        const btn = document.querySelector(`button[onclick="cancelSlot('${time}')"]`);
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = 'Cancel';
+        }
+      }
+      return true;
+    }
+
+    flatpickr('#date-picker', {
+      dateFormat: 'Y-m-d',
+      defaultDate: selectedDate,
+      onChange: (selectedDates) => {
+        selectedDate = selectedDates[0].toISOString().split('T')[0];
+        fetchSlots();
+      }
+    });
+
+    showLogin();
+  </script>
+</body>
+</html>
